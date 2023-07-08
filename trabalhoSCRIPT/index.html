@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cliente</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.2/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.2/codemirror.min.js"></script>
+  <style>
+
+    .CodeMirror {
+      height: auto;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+    body , *{
+        padding: 0;
+        margin: 0;
+    }
+
+    body {
+        padding-top: 40px;
+        width: 100vw;
+        height: 100vh;
+        background: #1C1C1C;
+    }
+    .container{
+        width: 100vw;
+        height : 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .container .grid-top, .grid-top2{
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .title {
+        font-family: Arial, Helvetica, sans-serif;
+        color: white;
+        padding-left: 20px;
+        margin-bottom: 60px;
+        top: 20px;
+    }
+    button {
+        border-radius: 100%;
+    }
+    .play-button {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #ff0000;
+      border: none;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .play-button:hover {
+        cursor: pointer;
+    }
+
+    .play-button::before,
+    .play-button::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-30%, -50%);
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .play-button::before {
+      border-width: 10px 0 10px 20px;
+      border-color: transparent transparent transparent white;
+    }
+
+    .play-button::after {
+      border-width: 0 0 0 10px;
+      border-color: transparent transparent transparent white;
+    }
+    .container-title{
+        justify-content: space-between;
+        display: flex;
+        width: calc(100vw/2);
+    }
+  </style>
+</head>
+<body>
+    <div class="container-title">
+        <h1 class="title">Envie um trecho de código<br> para o servidor (JS)</h1>
+        <button class="play-button" onclick="executeCode()"></button>
+    </div>
+    <div class="container">
+        <div class="grid-top">
+            <textarea id="code"></textarea>
+            <br>
+            <br>
+            <pre id="output"></pre>
+        </div>
+        <div class="grid-top2">
+            <textarea id="code2"></textarea>
+            <br>
+            <br>
+        </div>
+    </div>
+  <script>
+        // Inicializa o CodeMirror
+    const codeTextarea = document.getElementById('code');
+    const codeEditor = CodeMirror.fromTextArea(codeTextarea, {
+      lineNumbers: true,
+      mode: 'javascript',
+    });
+
+    const codeTextarea2 = document.getElementById('code2');
+    const codeEditor2 = CodeMirror.fromTextArea(codeTextarea2, {
+      lineNumbers: true,
+      mode: 'javascript',
+    });
+
+    codeEditor.setSize(null, '400px'); // Ajuste a altura conforme necessário
+    codeEditor.setValue(Array(30).fill('').join('\n'))
+
+    codeEditor2.setSize(null, '400px'); // Ajuste a altura conforme necessário
+    codeEditor2.setValue(Array(30).fill('').join('\n'))
+
+    codeEditor.setValue("for (var i = 0; i < 100; i++) \n {\n  console.log(i)\n }")
+
+    function executeCode() {
+      const code = codeEditor.getValue();
+      const data = { code };
+
+      fetch('http://localhost:3000/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        codeEditor2.setValue(result.output)
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+      });
+    }
+  </script>
+</body>
+</html>
